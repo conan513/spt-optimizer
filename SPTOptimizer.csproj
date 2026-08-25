@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>SPTOptimizer</AssemblyName>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>1.0.0</Version>
+    <Company>tarkov-modified-mods</Company>
+    <Description>SPT memory and CPU optimizer plugin for BepInEx 5</Description>
+    <Copyright>Copyright 2025</Copyright>
+    <SptInstallPath Condition="'$(SptInstallPath)' == ''">C:\Battlestate Games\SPP-Tarkov</SptInstallPath>
+  </PropertyGroup>
+
+  <!-- SPT modules Shared reference path -->
+  <PropertyGroup>
+    <SptModulesPath>$(MSBuildThisFileDirectory)..\..\SPT\modules</SptModulesPath>
+    <SharedManagedPath>$(SptModulesPath)\Shared\Managed</SharedManagedPath>
+    <SharedHollowedPath>$(SptModulesPath)\Shared\Hollowed</SharedHollowedPath>
+  </PropertyGroup>
+
+  <!-- BepInEx + Harmony via NuGet -->
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8"
+      PrivateAssets="All"
+      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3"
+      ExcludeAssets="runtime" PrivateAssets="all">
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- EFT / Unity game DLL references (from SPT modules Shared) -->
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" HintPath="$(SharedHollowedPath)\hollowed.dll" Private="False" />
+    <Reference Include="Comfort"         HintPath="$(SharedManagedPath)\Comfort.dll"   Private="False" />
+    <Reference Include="UnityEngine"     HintPath="$(SharedManagedPath)\UnityEngine.dll" Private="False" />
+    <Reference Include="UnityEngine.CoreModule"      HintPath="$(SharedManagedPath)\UnityEngine.CoreModule.dll"      Private="False" />
+    <Reference Include="UnityEngine.AudioModule"     HintPath="$(SharedManagedPath)\UnityEngine.AudioModule.dll"     Private="False" />
+    <Reference Include="UnityEngine.AssetBundleModule" HintPath="$(SharedManagedPath)\UnityEngine.AssetBundleModule.dll" Private="False" />
+    <Reference Include="UnityEngine.AnimationModule" HintPath="$(SharedManagedPath)\UnityEngine.AnimationModule.dll" Private="False" />
+    <Reference Include="UnityEngine.UIModule"        HintPath="$(SharedManagedPath)\UnityEngine.UIModule.dll"        Private="False" />
+    <Reference Include="UnityEngine.UI"              HintPath="$(SharedManagedPath)\UnityEngine.UI.dll"              Private="False" />
+    <Reference Include="NLog"                        HintPath="$(SharedManagedPath)\NLog.dll"                        Private="False" />
+    <Reference Include="Newtonsoft.Json"             HintPath="$(SharedManagedPath)\Newtonsoft.Json.dll"             Private="False" />
+  </ItemGroup>
+
+  <!-- SPT reflection/common DLL (from modules build output) -->
+  <ItemGroup>
+    <Reference Include="spt-reflection"
+      HintPath="$(SptModulesPath)\SPT.Reflection\bin\Release\netstandard2.1\spt-reflection.dll"
+      Private="False" />
+    <Reference Include="spt-common"
+      HintPath="$(SptModulesPath)\SPT.Common\bin\Release\netstandard2.1\spt-common.dll"
+      Private="False" />
+  </ItemGroup>
+
+  <!-- Post-build: copy to SPT BepInEx plugins folder -->
+  <Target Name="CopyToSPT" AfterTargets="Build" Condition="Exists('$(SptInstallPath)\BepInEx\plugins\')">
+    <MakeDir Directories="$(SptInstallPath)\BepInEx\plugins\$(AssemblyName)" />
+    <Copy
+      SourceFiles="$(OutputPath)$(AssemblyName).dll"
+      DestinationFolder="$(SptInstallPath)\BepInEx\plugins\$(AssemblyName)"
+      SkipUnchangedFiles="false" />
+    <Message Text="[Auto-Deploy] Copied $(AssemblyName).dll to $(SptInstallPath)\BepInEx\plugins\$(AssemblyName)\" Importance="high" />
+  </Target>
+
+</Project>
