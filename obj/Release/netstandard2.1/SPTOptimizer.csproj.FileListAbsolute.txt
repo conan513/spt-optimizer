@@ -1,11 +1,11 @@
+D:\Source\tarkov-modified-mods\spt-optimizer\bin\Release\netstandard2.1\SPTOptimizer.deps.json
+D:\Source\tarkov-modified-mods\spt-optimizer\bin\Release\netstandard2.1\SPTOptimizer.dll
+D:\Source\tarkov-modified-mods\spt-optimizer\bin\Release\netstandard2.1\SPTOptimizer.pdb
 D:\Source\tarkov-modified-mods\spt-optimizer\obj\Release\netstandard2.1\SPTOptimizer.csproj.AssemblyReference.cache
 D:\Source\tarkov-modified-mods\spt-optimizer\obj\Release\netstandard2.1\MyPluginInfo.cs
 D:\Source\tarkov-modified-mods\spt-optimizer\obj\Release\netstandard2.1\SPTOptimizer.GeneratedMSBuildEditorConfig.editorconfig
 D:\Source\tarkov-modified-mods\spt-optimizer\obj\Release\netstandard2.1\SPTOptimizer.AssemblyInfoInputs.cache
 D:\Source\tarkov-modified-mods\spt-optimizer\obj\Release\netstandard2.1\SPTOptimizer.AssemblyInfo.cs
 D:\Source\tarkov-modified-mods\spt-optimizer\obj\Release\netstandard2.1\SPTOptimizer.csproj.CoreCompileInputs.cache
-D:\Source\tarkov-modified-mods\spt-optimizer\bin\Release\netstandard2.1\SPTOptimizer.deps.json
-D:\Source\tarkov-modified-mods\spt-optimizer\bin\Release\netstandard2.1\SPTOptimizer.dll
-D:\Source\tarkov-modified-mods\spt-optimizer\bin\Release\netstandard2.1\SPTOptimizer.pdb
 D:\Source\tarkov-modified-mods\spt-optimizer\obj\Release\netstandard2.1\SPTOptimizer.dll
 D:\Source\tarkov-modified-mods\spt-optimizer\obj\Release\netstandard2.1\SPTOptimizer.pdb

@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCopyrightAttribute("Copyright 2025")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("SPT memory and CPU optimizer plugin for BepInEx 5")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+238c50315e3288aecec87d8d0979cca4713e2f69")]
 [assembly: System.Reflection.AssemblyProductAttribute("SPTOptimizer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SPTOptimizer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

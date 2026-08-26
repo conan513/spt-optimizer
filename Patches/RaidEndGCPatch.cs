@@ -1,10 +1,11 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Reflection;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
 using SPTOptimizer.Config;
+using SPTOptimizer.Utils;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -84,6 +85,10 @@ public static class RaidEndGCPatch
 
         // Second GC pass after asset unload finalizes freed objects
         PeriodicGCComponent.RunGC("raid-end-post-unload");
+
+        // Trim working set to release physical memory back to Windows
+        MemoryTrimmer.TrimWorkingSet("raid-end", forceInRaid: true);
+
         _log?.LogInfo("[RaidEndGC] Memory cleanup complete.");
     }
 }

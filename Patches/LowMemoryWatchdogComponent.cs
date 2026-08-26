@@ -1,7 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using BepInEx.Logging;
+using Comfort.Common;
+using EFT;
 using SPTOptimizer.Config;
+using SPTOptimizer.Utils;
 using UnityEngine;
 
 namespace SPTOptimizer.Patches;
@@ -18,6 +21,18 @@ public class LowMemoryWatchdogComponent : MonoBehaviour
     public static void Initialize(ManualLogSource log)
     {
         _log = log;
+    }
+
+    public static bool IsInRaid()
+    {
+        try
+        {
+            return Singleton<AbstractGame>.Instantiated && Singleton<AbstractGame>.Instance != null;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void Start()

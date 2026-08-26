@@ -1,8 +1,9 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using SPTOptimizer.Config;
 using SPTOptimizer.Patches;
+using SPTOptimizer.Utils;
 using UnityEngine;
 
 namespace SPTOptimizer;
@@ -29,14 +30,16 @@ public class Plugin : BaseUnityPlugin
         PeriodicGCComponent.Initialize(Log);
         LowMemoryWatchdogComponent.Initialize(Log);
         MemoryLogComponent.Initialize(Log);
+        MemoryTrimmer.Initialize(Log);
 
         gameObject.AddComponent<PeriodicGCComponent>();
         gameObject.AddComponent<LowMemoryWatchdogComponent>();
         gameObject.AddComponent<MemoryLogComponent>();
         DontDestroyOnLoad(gameObject);
 
-        // 3. Apply Graphics & Texture streaming settings
+        // 3. Apply Graphics & Process settings
         GraphicsOptimizer.Initialize(Log);
+        ProcessOptimizer.Initialize(Log);
 
         // 4. Apply Harmony Patches (e.g. Raid end GC & asset unload)
         try
