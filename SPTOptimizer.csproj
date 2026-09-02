@@ -6,18 +6,19 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Company>tarkov-modified-mods</Company>
-    <Description>SPT memory and CPU optimizer plugin for BepInEx 5</Description>
+    <Description>SPT memory and CPU optimizer plugin for BepInEx 5 with Linux/Proton support</Description>
     <Copyright>Copyright 2025</Copyright>
     <SptInstallPath Condition="'$(SptInstallPath)' == ''">C:\Battlestate Games\SPP-Tarkov</SptInstallPath>
   </PropertyGroup>
 
-  <!-- SPT modules Shared reference path -->
+  <!-- Reference path -->
   <PropertyGroup>
+    <RefPath Condition="'$(RefPath)' == '' and Exists('$(MSBuildThisFileDirectory)../MiyakoCarryService/Ref')">$(MSBuildThisFileDirectory)../MiyakoCarryService/Ref</RefPath>
     <SptModulesPath>$(MSBuildThisFileDirectory)..\..\SPT\modules</SptModulesPath>
-    <SharedManagedPath>$(SptModulesPath)\Shared\Managed</SharedManagedPath>
-    <SharedHollowedPath>$(SptModulesPath)\Shared\Hollowed</SharedHollowedPath>
+    <SharedManagedPath Condition="Exists('$(SptModulesPath)\Shared\Managed')">$(SptModulesPath)\Shared\Managed</SharedManagedPath>
+    <SharedManagedPath Condition="'$(SharedManagedPath)' == ''">$(RefPath)</SharedManagedPath>
   </PropertyGroup>
 
   <!-- BepInEx + Harmony via NuGet -->
@@ -33,39 +34,43 @@
     </PackageReference>
   </ItemGroup>
 
-  <!-- EFT / Unity game DLL references (from SPT modules Shared) -->
+  <!-- EFT / Unity game DLL references -->
   <ItemGroup>
-    <Reference Include="Assembly-CSharp" HintPath="$(SharedHollowedPath)\hollowed.dll" Private="False" />
-    <Reference Include="Comfort"         HintPath="$(SharedManagedPath)\Comfort.dll"   Private="False" />
-    <Reference Include="UnityEngine"     HintPath="$(SharedManagedPath)\UnityEngine.dll" Private="False" />
-    <Reference Include="UnityEngine.CoreModule"      HintPath="$(SharedManagedPath)\UnityEngine.CoreModule.dll"      Private="False" />
-    <Reference Include="UnityEngine.AudioModule"     HintPath="$(SharedManagedPath)\UnityEngine.AudioModule.dll"     Private="False" />
-    <Reference Include="UnityEngine.AssetBundleModule" HintPath="$(SharedManagedPath)\UnityEngine.AssetBundleModule.dll" Private="False" />
-    <Reference Include="UnityEngine.AnimationModule" HintPath="$(SharedManagedPath)\UnityEngine.AnimationModule.dll" Private="False" />
-    <Reference Include="UnityEngine.UIModule"        HintPath="$(SharedManagedPath)\UnityEngine.UIModule.dll"        Private="False" />
-    <Reference Include="UnityEngine.UI"              HintPath="$(SharedManagedPath)\UnityEngine.UI.dll"              Private="False" />
-    <Reference Include="NLog"                        HintPath="$(SharedManagedPath)\NLog.dll"                        Private="False" />
-    <Reference Include="Newtonsoft.Json"             HintPath="$(SharedManagedPath)\Newtonsoft.Json.dll"             Private="False" />
+    <Reference Include="0Harmony"                   HintPath="$(RefPath)\0Harmony.dll" Private="False" />
+    <Reference Include="Assembly-CSharp"             HintPath="$(RefPath)\Assembly-CSharp.dll" Private="False" />
+    <Reference Include="Comfort"                     HintPath="$(RefPath)\Comfort.dll"   Private="False" />
+    <Reference Include="Comfort.Unity"               HintPath="$(RefPath)\Comfort.Unity.dll" Private="False" />
+    <Reference Include="UnityEngine"                 HintPath="$(RefPath)\UnityEngine.dll" Private="False" />
+    <Reference Include="UnityEngine.CoreModule"      HintPath="$(RefPath)\UnityEngine.CoreModule.dll" Private="False" />
+    <Reference Include="UnityEngine.AudioModule"     HintPath="$(RefPath)\UnityEngine.AudioModule.dll" Private="False" />
+    <Reference Include="UnityEngine.AssetBundleModule" HintPath="$(RefPath)\UnityEngine.AssetBundleModule.dll" Private="False" />
+    <Reference Include="UnityEngine.AnimationModule" HintPath="$(RefPath)\UnityEngine.AnimationModule.dll" Private="False" />
+    <Reference Include="UnityEngine.ClothModule"     HintPath="$(RefPath)\UnityEngine.ClothModule.dll" Private="False" />
+    <Reference Include="UnityEngine.PhysicsModule"   HintPath="$(RefPath)\UnityEngine.PhysicsModule.dll" Private="False" />
+    <Reference Include="UnityEngine.ParticleSystemModule" HintPath="$(RefPath)\UnityEngine.ParticleSystemModule.dll" Private="False" />
+    <Reference Include="UnityEngine.IMGUIModule"     HintPath="$(RefPath)\UnityEngine.IMGUIModule.dll" Private="False" />
+    <Reference Include="UnityEngine.UIModule"        HintPath="$(RefPath)\UnityEngine.UIModule.dll" Private="False" />
+    <Reference Include="UnityEngine.UI"              HintPath="$(RefPath)\UnityEngine.UI.dll" Private="False" />
+    <Reference Include="Newtonsoft.Json"             HintPath="$(RefPath)\Newtonsoft.Json.dll" Private="False" />
   </ItemGroup>
 
-  <!-- SPT reflection/common DLL (from modules build output) -->
+  <!-- SPT reflection/common DLL -->
   <ItemGroup>
     <Reference Include="spt-reflection"
-      HintPath="$(SptModulesPath)\SPT.Reflection\bin\Release\netstandard2.1\spt-reflection.dll"
+      HintPath="$(RefPath)\spt-reflection.dll"
       Private="False" />
     <Reference Include="spt-common"
-      HintPath="$(SptModulesPath)\SPT.Common\bin\Release\netstandard2.1\spt-common.dll"
+      HintPath="$(RefPath)\spt-common.dll"
       Private="False" />
   </ItemGroup>
 
   <!-- Post-build: copy to SPT BepInEx plugins folder -->
   <Target Name="CopyToSPT" AfterTargets="Build" Condition="Exists('$(SptInstallPath)\BepInEx\plugins\')">
-    <MakeDir Directories="$(SptInstallPath)\BepInEx\plugins\$(AssemblyName)" />
     <Copy
       SourceFiles="$(OutputPath)$(AssemblyName).dll"
-      DestinationFolder="$(SptInstallPath)\BepInEx\plugins\$(AssemblyName)"
+      DestinationFolder="$(SptInstallPath)\BepInEx\plugins\"
       SkipUnchangedFiles="false" />
-    <Message Text="[Auto-Deploy] Copied $(AssemblyName).dll to $(SptInstallPath)\BepInEx\plugins\$(AssemblyName)\" Importance="high" />
+    <Message Text="[Auto-Deploy] Copied $(AssemblyName).dll to $(SptInstallPath)\BepInEx\plugins\" Importance="high" />
   </Target>
 
 </Project>

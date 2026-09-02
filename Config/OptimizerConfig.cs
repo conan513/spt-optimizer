@@ -13,11 +13,13 @@ public static class OptimizerConfig
     public static ConfigEntry<int>  GCIntervalSeconds = null!;
     public static ConfigEntry<bool> UseIncrementalGC = null!;
     public static ConfigEntry<int>  IncrementalGCBudgetMs = null!;
+    public static ConfigEntry<bool> EnableInventoryOpenGC = null!;
 
     // ── Low-memory watchdog ──────────────────────────────────────────────────────
     public static ConfigEntry<bool> EnableLowMemoryWatchdog = null!;
     public static ConfigEntry<int>  MemoryThresholdMB = null!;
     public static ConfigEntry<int>  WatchdogIntervalSeconds = null!;
+    public static ConfigEntry<bool> WatchdogUsePhysicalMemory = null!;
 
     // ── Texture & Streaming ──────────────────────────────────────────────────────
     public static ConfigEntry<bool> EnableTextureMipStreaming = null!;
@@ -56,9 +58,13 @@ public static class OptimizerConfig
     public static ConfigEntry<int>    TargetFrameRate = null!;
     public static ConfigEntry<int>    VSyncMode = null!;
 
-    // ── Raid-end GC ──────────────────────────────────────────────────────────────
+    // ── Raid-end & Menu Cleanup ──────────────────────────────────────────────────
     public static ConfigEntry<bool> EnableRaidEndGC = null!;
     public static ConfigEntry<bool> UnloadUnusedAssetsOnRaidEnd = null!;
+    public static ConfigEntry<bool> EnableMenuAndHideoutCleanup = null!;
+
+    // ── Dead Bot Optimization ────────────────────────────────────────────────────
+    public static ConfigEntry<bool> EnableDeadBotOptimization = null!;
 
     // ── Memory logging ───────────────────────────────────────────────────────────
     public static ConfigEntry<bool> EnableMemoryLog = null!;
@@ -68,8 +74,9 @@ public static class OptimizerConfig
     public static ConfigEntry<bool>   EnableProcessPriority = null!;
     public static ConfigEntry<string> ProcessPriorityLevel = null!;
 
-    // ── RAM Cleaner ──────────────────────────────────────────────────────────────
+    // ── RAM Cleaner & Linux Malloc Trim ──────────────────────────────────────────
     public static ConfigEntry<bool> EnableActiveRAMCleaner = null!;
+    public static ConfigEntry<bool> EnableLinuxMallocTrim = null!;
 
     public static void Initialize(ConfigFile cfg)
     {
@@ -90,10 +97,18 @@ public static class OptimizerConfig
             "1 - Periodic GC", "IncrementalBudgetMs", 25,
             new ConfigDescription("Nanosecond budget for incremental GC (in ms, converted internally).", new AcceptableValueRange<int>(5, 100)));
 
+        EnableInventoryOpenGC = cfg.Bind(
+            "1 - Periodic GC", "EnableInventoryOpenGC", true,
+            "Trigger a safe incremental GC cycle when opening the inventory or looting (avoids combat stutters).");
+
         // ── 2. Low-memory watchdog ─────────────────────────────────────────────────
         EnableLowMemoryWatchdog = cfg.Bind(
             "2 - Low Memory Watchdog", "Enable", true,
             "Monitor memory usage and trigger GC when it exceeds the threshold.");
+
+        WatchdogUsePhysicalMemory = cfg.Bind(
+            "2 - Low Memory Watchdog", "UsePhysicalMemory", true,
+            "Monitor real total process memory (WorkingSet / RAM) instead of just the C# managed heap.");
 
         MemoryThresholdMB = cfg.Bind(
             "2 - Low Memory Watchdog", "ThresholdMB", 7168,
@@ -207,36 +222,49 @@ public static class OptimizerConfig
             "6 - Render & Performance", "VSyncCount", 0,
             new ConfigDescription("Vertical sync count (0 = Off / Unlocked, 1 = Every VBlank / Monitor refresh rate, 2 = Every second VBlank).", new AcceptableValueList<int>(0, 1, 2)));
 
-        // ── 7. Raid-end GC ─────────────────────────────────────────────────────────
+        // ── 7. Raid-end & Menu GC ──────────────────────────────────────────────────
         EnableRaidEndGC = cfg.Bind(
-            "7 - Raid End GC", "Enable", true,
+            "7 - Raid End & Menu GC", "Enable", true,
             "Trigger a full GC when exiting a raid to free all orphaned memory.");
 
         UnloadUnusedAssetsOnRaidEnd = cfg.Bind(
-            "7 - Raid End GC", "UnloadUnusedAssets", true,
+            "7 - Raid End & Menu GC", "UnloadUnusedAssets", true,
             "Call Resources.UnloadUnusedAssets() after raid. This is slow but frees a LOT of memory. Runs asynchronously.");
 
-        // ── 8. Memory logging ──────────────────────────────────────────────────────
+        EnableMenuAndHideoutCleanup = cfg.Bind(
+            "7 - Raid End & Menu GC", "EnableMenuAndHideoutCleanup", true,
+            "Unload unused 3D models and textures when leaving Trader screens or Hideout to prevent menu memory bloat.");
+
+        // ── 8. Dead Bot Optimization ───────────────────────────────────────────────
+        EnableDeadBotOptimization = cfg.Bind(
+            "8 - Dead Bot Optimization", "Enable", true,
+            "Disable cloth simulation and offscreen skeletal updates on dead bot corpses to save CPU and RAM in long raids.");
+
+        // ── 9. Memory logging ──────────────────────────────────────────────────────
         EnableMemoryLog = cfg.Bind(
-            "8 - Memory Log", "Enable", false,
+            "9 - Memory Log", "Enable", false,
             "Log current memory usage periodically to the BepInEx console/log.");
 
         MemoryLogIntervalSeconds = cfg.Bind(
-            "8 - Memory Log", "IntervalSeconds", 30,
+            "9 - Memory Log", "IntervalSeconds", 30,
             new ConfigDescription("How often (seconds) to log memory usage.", new AcceptableValueRange<int>(5, 300)));
 
-        // ── 9. Process Priority ────────────────────────────────────────────────────
+        // ── 10. Process Priority ───────────────────────────────────────────────────
         EnableProcessPriority = cfg.Bind(
-            "9 - Process Priority", "Enable", true,
-            "Automatically set Tarkov's Windows process priority to give it CPU scheduling preference.");
+            "10 - Process Priority", "Enable", true,
+            "Automatically set Tarkov's process priority to give it CPU scheduling preference.");
 
         ProcessPriorityLevel = cfg.Bind(
-            "9 - Process Priority", "PriorityLevel", "AboveNormal",
+            "10 - Process Priority", "PriorityLevel", "AboveNormal",
             new ConfigDescription("Process priority level.", new AcceptableValueList<string>("Normal", "AboveNormal", "High")));
 
-        // ── 10. RAM Cleaner ────────────────────────────────────────────────────────
+        // ── 11. RAM Cleaner & Linux Malloc Trim ────────────────────────────────────
         EnableActiveRAMCleaner = cfg.Bind(
-            "10 - RAM Cleaner", "Enable", true,
+            "11 - RAM Cleaner", "Enable", true,
             "Empty working set memory to force OS to reclaim unused physical pages (safely outside of raid).");
+
+        EnableLinuxMallocTrim = cfg.Bind(
+            "11 - RAM Cleaner", "EnableLinuxMallocTrim", true,
+            "Call glibc malloc_trim(0) under Proton/Linux/Wine to release unmapped heap memory back to the Linux kernel.");
     }
 }

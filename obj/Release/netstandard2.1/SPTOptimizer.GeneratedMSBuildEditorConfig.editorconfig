@@ -1,6 +1,6 @@
 is_global = true
 build_property.RootNamespace = SPTOptimizer
-build_property.ProjectDir = D:\Source\tarkov-modified-mods\spt-optimizer\
+build_property.ProjectDir = /mnt/raid0/Source/Tarkov-Custom-Mods/spt-optimizer/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.CsWinRTUseWindowsUIXamlProjections = false

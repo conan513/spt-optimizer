@@ -4,6 +4,6 @@ namespace SPTOptimizer
     {
         public const string PLUGIN_GUID = "SPTOptimizer";
         public const string PLUGIN_NAME = "SPTOptimizer";
-        public const string PLUGIN_VERSION = "1.0.0";
+        public const string PLUGIN_VERSION = "1.1.0";
     }
 }

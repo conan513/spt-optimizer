@@ -1,19 +1,21 @@
-﻿using System;
+using System;
 using System.Collections;
 using BepInEx.Logging;
 using SPTOptimizer.Config;
+using SPTOptimizer.Utils;
 using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace SPTOptimizer.Patches;
 
 /// <summary>
-/// MonoBehaviour component that drives the periodic garbage collection coroutine.
-/// Attached to a persistent GameObject created by the plugin.
+/// Handles periodic garbage collection cycles, incremental GC slicing,
+/// and provides centralized GC trigger methods for other optimizer modules.
 /// </summary>
 public class PeriodicGCComponent : MonoBehaviour
 {
     private static ManualLogSource? _log;
+    private static float _lastGCTime;
 
     public static void Initialize(ManualLogSource log)
     {
@@ -27,41 +29,67 @@ public class PeriodicGCComponent : MonoBehaviour
 
     private IEnumerator PeriodicGCRoutine()
     {
-        _log?.LogInfo("[PeriodicGC] Coroutine started.");
+        _log?.LogInfo("[PeriodicGC] Started periodic GC routine.");
 
         while (true)
         {
-            yield return new WaitForSeconds(OptimizerConfig.GCIntervalSeconds.Value);
+            yield return new WaitForSeconds(Mathf.Max(5, OptimizerConfig.GCIntervalSeconds.Value));
 
             if (!OptimizerConfig.EnablePeriodicGC.Value)
                 continue;
 
             try
             {
-                RunGC("periodic");
+                RunGC("periodic-timer");
             }
             catch (Exception ex)
             {
-                _log?.LogError($"[PeriodicGC] Exception during GC: {ex.Message}");
+                _log?.LogError($"[PeriodicGC] Exception during routine: {ex.Message}");
             }
         }
     }
 
-    internal static void RunGC(string reason)
+    /// <summary>
+    /// Executes a managed garbage collection cycle safely.
+    /// In raid, uses incremental GC budget if configured to avoid combat micro-stutters.
+    /// Outside raid, performs a complete GC collection.
+    /// </summary>
+    public static void RunGC(string callerReason)
     {
-        if (OptimizerConfig.UseIncrementalGC.Value)
+        try
         {
-            // Enable incremental mode and run a time-sliced collection
-            GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
-            ulong budgetNs = (ulong)(OptimizerConfig.IncrementalGCBudgetMs.Value * 1_000_000L);
-            GarbageCollector.CollectIncremental(budgetNs);
-            _log?.LogDebug($"[GC] Incremental GC triggered ({reason}), budget: {OptimizerConfig.IncrementalGCBudgetMs.Value}ms");
+            long beforeMemMB = GC.GetTotalMemory(forceFullCollection: false) / (1024 * 1024);
+
+            bool inRaid = LowMemoryWatchdogComponent.IsInRaid();
+
+            if (inRaid && OptimizerConfig.UseIncrementalGC.Value && GarbageCollector.isIncremental)
+            {
+                // Convert ms budget to nanoseconds (1 ms = 1,000,000 ns)
+                ulong budgetNs = (ulong)OptimizerConfig.IncrementalGCBudgetMs.Value * 1000000UL;
+                GarbageCollector.CollectIncremental(budgetNs);
+                _log?.LogDebug($"[PeriodicGC] Incremental GC ran ({callerReason}, budget: {OptimizerConfig.IncrementalGCBudgetMs.Value}ms)");
+            }
+            else
+            {
+                // Full generation collection
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: false, compacting: true);
+                GC.WaitForPendingFinalizers();
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: false, compacting: true);
+
+                long afterMemMB = GC.GetTotalMemory(forceFullCollection: false) / (1024 * 1024);
+                long freedMB = beforeMemMB - afterMemMB;
+
+                if (freedMB > 0)
+                {
+                    _log?.LogDebug($"[PeriodicGC] Full GC ({callerReason}): {beforeMemMB} MB -> {afterMemMB} MB (Freed {freedMB} MB)");
+                }
+            }
+
+            _lastGCTime = Time.realtimeSinceStartup;
         }
-        else
+        catch (Exception ex)
         {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            _log?.LogDebug($"[GC] Full GC triggered ({reason})");
+            _log?.LogWarning($"[PeriodicGC] Error during GC execution ({callerReason}): {ex.Message}");
         }
     }
 }

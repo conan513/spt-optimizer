@@ -10,8 +10,8 @@ using UnityEngine;
 namespace SPTOptimizer.Patches;
 
 /// <summary>
-/// Monitors process memory and triggers a GC when usage exceeds the configured threshold.
-/// Runs as a coroutine on a persistent GameObject.
+/// Monitors process memory (real working set RAM or managed heap) and triggers
+/// emergency GC when usage exceeds the configured threshold.
 /// </summary>
 public class LowMemoryWatchdogComponent : MonoBehaviour
 {
@@ -64,11 +64,19 @@ public class LowMemoryWatchdogComponent : MonoBehaviour
 
     private void CheckMemory()
     {
-        long usedMB = GC.GetTotalMemory(forceFullCollection: false) / (1024 * 1024);
+        long usedMB;
+        if (OptimizerConfig.WatchdogUsePhysicalMemory.Value)
+        {
+            usedMB = MemoryTrimmer.GetProcessWorkingSetMB();
+        }
+        else
+        {
+            usedMB = GC.GetTotalMemory(forceFullCollection: false) / (1024 * 1024);
+        }
 
         if (usedMB >= OptimizerConfig.MemoryThresholdMB.Value)
         {
-            _log?.LogWarning($"[LowMemoryWatchdog] High memory: {usedMB} MB >= threshold {OptimizerConfig.MemoryThresholdMB.Value} MB. Triggering GC...");
+            _log?.LogWarning($"[LowMemoryWatchdog] High memory: {usedMB} MB >= threshold {OptimizerConfig.MemoryThresholdMB.Value} MB. Triggering emergency GC...");
             StartCoroutine(EmergencyGCRoutine());
         }
     }
@@ -79,14 +87,21 @@ public class LowMemoryWatchdogComponent : MonoBehaviour
 
         PeriodicGCComponent.RunGC("emergency-watchdog");
 
-        // Wait a frame before unloading unused assets to avoid stutter
-        yield return null;
-
-        if (OptimizerConfig.UnloadUnusedAssetsOnRaidEnd.Value)
+        // Outside of raid, do a full asset unload and memory trim
+        if (!IsInRaid())
         {
+            yield return null;
             var op = Resources.UnloadUnusedAssets();
             yield return op;
-            _log?.LogInfo("[LowMemoryWatchdog] UnloadUnusedAssets completed.");
+            PeriodicGCComponent.RunGC("emergency-post-unload");
+            MemoryTrimmer.TrimWorkingSet("emergency-watchdog", forceInRaid: true);
+            _log?.LogInfo("[LowMemoryWatchdog] Full emergency memory cleanup completed.");
+        }
+        else
+        {
+            // In-raid: just incremental GC and safe malloc trim
+            MemoryTrimmer.TrimWorkingSet("emergency-watchdog-inraid", forceInRaid: false);
+            _log?.LogInfo("[LowMemoryWatchdog] In-raid lightweight emergency GC completed.");
         }
 
         _triggerInProgress = false;

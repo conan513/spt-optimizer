@@ -8,20 +8,39 @@ using SPTOptimizer.Patches;
 namespace SPTOptimizer.Utils;
 
 /// <summary>
-/// Interacts with the Windows memory manager.
-/// NOTE: Working set trimming in-raid causes severe hard page-fault stuttering.
-/// It is only safely executed in menus or when exiting a raid.
+/// Interacts with the OS memory manager (Windows NT WorkingSet and Linux / Wine glibc malloc_trim).
 /// </summary>
 public static class MemoryTrimmer
 {
     private static ManualLogSource? _log;
+    private static bool _mallocTrimFailed;
+    private static bool _emptyWorkingSetFailed;
 
     [DllImport("psapi.dll", SetLastError = true)]
     private static extern int EmptyWorkingSet(IntPtr hProcess);
 
+    [DllImport("libc", EntryPoint = "malloc_trim", SetLastError = true)]
+    private static extern int malloc_trim_libc(IntPtr pad);
+
+    [DllImport("msvcrt.dll", EntryPoint = "malloc_trim", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
+    private static extern int malloc_trim_msvcrt(IntPtr pad);
+
     public static void Initialize(ManualLogSource log)
     {
         _log = log;
+    }
+
+    public static long GetProcessWorkingSetMB()
+    {
+        try
+        {
+            using var proc = Process.GetCurrentProcess();
+            return proc.WorkingSet64 / (1024 * 1024);
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     public static void TrimWorkingSet(string callerReason, bool forceInRaid = false)
@@ -38,21 +57,63 @@ public static class MemoryTrimmer
 
         try
         {
-            using var proc = Process.GetCurrentProcess();
-            long beforeMB = proc.WorkingSet64 / (1024 * 1024);
+            long beforeMB = GetProcessWorkingSetMB();
 
-            int result = EmptyWorkingSet(proc.Handle);
-            if (result != 0)
+            // 1. Try Windows EmptyWorkingSet
+            if (!_emptyWorkingSetFailed)
             {
-                proc.Refresh();
-                long afterMB = proc.WorkingSet64 / (1024 * 1024);
-                long freedMB = beforeMB - afterMB;
-                _log?.LogInfo($"[RAMCleaner] Trimmed working set ({callerReason}): {beforeMB} MB -> {afterMB} MB (Freed {freedMB} MB RAM)");
+                try
+                {
+                    using var proc = Process.GetCurrentProcess();
+                    EmptyWorkingSet(proc.Handle);
+                }
+                catch (Exception ex)
+                {
+                    _emptyWorkingSetFailed = true;
+                    _log?.LogDebug($"[RAMCleaner] EmptyWorkingSet not available ({ex.Message}), trying Linux malloc_trim...");
+                }
+            }
+
+            // 2. Try Linux / glibc malloc_trim if enabled
+            if (OptimizerConfig.EnableLinuxMallocTrim.Value && !_mallocTrimFailed)
+            {
+                TrimLinuxGlibcHeap();
+            }
+
+            long afterMB = GetProcessWorkingSetMB();
+            long freedMB = beforeMB - afterMB;
+            if (freedMB > 0)
+            {
+                _log?.LogInfo($"[RAMCleaner] Trimmed memory ({callerReason}): {beforeMB} MB -> {afterMB} MB (Freed {freedMB} MB RAM)");
+            }
+            else
+            {
+                _log?.LogDebug($"[RAMCleaner] Memory trim executed ({callerReason}): Current WorkingSet = {afterMB} MB");
             }
         }
         catch (Exception ex)
         {
             _log?.LogWarning($"[RAMCleaner] Failed to trim working set: {ex.Message}");
+        }
+    }
+
+    private static void TrimLinuxGlibcHeap()
+    {
+        try
+        {
+            malloc_trim_libc(IntPtr.Zero);
+        }
+        catch
+        {
+            try
+            {
+                malloc_trim_msvcrt(IntPtr.Zero);
+            }
+            catch
+            {
+                _mallocTrimFailed = true;
+                _log?.LogDebug("[RAMCleaner] malloc_trim not supported in current environment.");
+            }
         }
     }
 }

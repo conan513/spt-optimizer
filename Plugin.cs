@@ -13,7 +13,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "com.spt.optimizer";
     public const string PluginName = "SPT Optimizer";
-    public const string PluginVersion = "1.0.0";
+    public const string PluginVersion = "1.1.0";
 
     internal static ManualLogSource Log = null!;
     private Harmony? _harmony;
@@ -41,12 +41,15 @@ public class Plugin : BaseUnityPlugin
         GraphicsOptimizer.Initialize(Log);
         ProcessOptimizer.Initialize(Log);
 
-        // 4. Apply Harmony Patches (e.g. Raid end GC & asset unload)
+        // 4. Apply Harmony Patches
         try
         {
             _harmony = new Harmony(PluginGuid);
             RaidEndGCPatch.Apply(Log, _harmony, this);
-            Log.LogInfo("[Harmony] Patches successfully initialized.");
+            MenuAndHideoutCleanupPatch.Apply(Log, _harmony, this);
+            DeadBotOptimizerPatch.Apply(Log, _harmony, this);
+            CorpseLootSafetyPatch.Apply(Log, _harmony);
+            Log.LogInfo("[Harmony] All patches successfully initialized.");
         }
         catch (System.Exception ex)
         {
@@ -61,5 +64,5 @@ public static class PluginInfo
 {
     public const string PLUGIN_GUID = "com.spt.optimizer";
     public const string PLUGIN_NAME = "SPT Optimizer";
-    public const string PLUGIN_VERSION = "1.0.0";
+    public const string PLUGIN_VERSION = "1.1.0";
 }

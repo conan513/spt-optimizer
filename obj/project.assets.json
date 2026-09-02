@@ -1,7 +1,7 @@
 {
-  "version": 4,
+  "version": 3,
   "targets": {
-    "netstandard2.1": {
+    ".NETStandard,Version=v2.1": {
       "BepInEx.Analyzers/1.0.8": {
         "type": "package"
       },
@@ -2745,7 +2745,7 @@
     }
   },
   "projectFileDependencyGroups": {
-    "netstandard2.1": [
+    ".NETStandard,Version=v2.1": [
       "BepInEx.Analyzers >= 1.0.8",
       "BepInEx.Core >= 5.4.21",
       "BepInEx.PluginInfoProps >= 2.1.0",
@@ -2753,31 +2753,28 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\conan\\.nuget\\packages\\": {}
+    "/home/conan/.nuget/packages/": {}
   },
   "project": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "restore": {
-      "projectUniqueName": "D:\\Source\\tarkov-modified-mods\\spt-optimizer\\SPTOptimizer.csproj",
+      "projectUniqueName": "/mnt/raid0/Source/Tarkov-Custom-Mods/spt-optimizer/SPTOptimizer.csproj",
       "projectName": "SPTOptimizer",
-      "projectPath": "D:\\Source\\tarkov-modified-mods\\spt-optimizer\\SPTOptimizer.csproj",
-      "packagesPath": "C:\\Users\\conan\\.nuget\\packages\\",
-      "outputPath": "D:\\Source\\tarkov-modified-mods\\spt-optimizer\\obj\\",
+      "projectPath": "/mnt/raid0/Source/Tarkov-Custom-Mods/spt-optimizer/SPTOptimizer.csproj",
+      "packagesPath": "/home/conan/.nuget/packages/",
+      "outputPath": "/mnt/raid0/Source/Tarkov-Custom-Mods/spt-optimizer/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\conan\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "/home/conan/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netstandard2.1"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netstandard2.1": {
-          "framework": "netstandard2.1",
           "targetAlias": "netstandard2.1",
           "projectReferences": {}
         }
@@ -2792,11 +2789,10 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.400"
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
       "netstandard2.1": {
-        "framework": "netstandard2.1",
         "targetAlias": "netstandard2.1",
         "dependencies": {
           "BepInEx.Analyzers": {
@@ -2831,12 +2827,18 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "NETStandard.Library.Ref",
+            "version": "[2.1.0, 2.1.0]"
+          }
+        ],
         "frameworkReferences": {
           "NETStandard.Library": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.111/RuntimeIdentifierGraph.json"
       }
     }
   }
