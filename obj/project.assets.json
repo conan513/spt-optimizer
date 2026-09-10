@@ -2758,11 +2758,11 @@
   "project": {
     "version": "1.1.0",
     "restore": {
-      "projectUniqueName": "/mnt/raid0/Source/Tarkov-Custom-Mods/spt-optimizer/SPTOptimizer.csproj",
+      "projectUniqueName": "/mnt/raid0/Source/SPT_mods/spt-optimizer/SPTOptimizer.csproj",
       "projectName": "SPTOptimizer",
-      "projectPath": "/mnt/raid0/Source/Tarkov-Custom-Mods/spt-optimizer/SPTOptimizer.csproj",
+      "projectPath": "/mnt/raid0/Source/SPT_mods/spt-optimizer/SPTOptimizer.csproj",
       "packagesPath": "/home/conan/.nuget/packages/",
-      "outputPath": "/mnt/raid0/Source/Tarkov-Custom-Mods/spt-optimizer/obj/",
+      "outputPath": "/mnt/raid0/Source/SPT_mods/spt-optimizer/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/conan/.nuget/NuGet/NuGet.Config"

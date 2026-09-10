@@ -16,8 +16,8 @@
   <!-- Reference path -->
   <PropertyGroup>
     <RefPath Condition="'$(RefPath)' == '' and Exists('$(MSBuildThisFileDirectory)../MiyakoCarryService/Ref')">$(MSBuildThisFileDirectory)../MiyakoCarryService/Ref</RefPath>
-    <SptModulesPath>$(MSBuildThisFileDirectory)..\..\SPT\modules</SptModulesPath>
-    <SharedManagedPath Condition="Exists('$(SptModulesPath)\Shared\Managed')">$(SptModulesPath)\Shared\Managed</SharedManagedPath>
+    <SptModulesPath>$(MSBuildThisFileDirectory)../../SPT/modules</SptModulesPath>
+    <SharedManagedPath Condition="Exists('$(SptModulesPath)/Shared/Managed')">$(SptModulesPath)/Shared/Managed</SharedManagedPath>
     <SharedManagedPath Condition="'$(SharedManagedPath)' == ''">$(RefPath)</SharedManagedPath>
   </PropertyGroup>
 
@@ -36,31 +36,31 @@
 
   <!-- EFT / Unity game DLL references -->
   <ItemGroup>
-    <Reference Include="0Harmony"                   HintPath="$(RefPath)\0Harmony.dll" Private="False" />
-    <Reference Include="Assembly-CSharp"             HintPath="$(RefPath)\Assembly-CSharp.dll" Private="False" />
-    <Reference Include="Comfort"                     HintPath="$(RefPath)\Comfort.dll"   Private="False" />
-    <Reference Include="Comfort.Unity"               HintPath="$(RefPath)\Comfort.Unity.dll" Private="False" />
-    <Reference Include="UnityEngine"                 HintPath="$(RefPath)\UnityEngine.dll" Private="False" />
-    <Reference Include="UnityEngine.CoreModule"      HintPath="$(RefPath)\UnityEngine.CoreModule.dll" Private="False" />
-    <Reference Include="UnityEngine.AudioModule"     HintPath="$(RefPath)\UnityEngine.AudioModule.dll" Private="False" />
-    <Reference Include="UnityEngine.AssetBundleModule" HintPath="$(RefPath)\UnityEngine.AssetBundleModule.dll" Private="False" />
-    <Reference Include="UnityEngine.AnimationModule" HintPath="$(RefPath)\UnityEngine.AnimationModule.dll" Private="False" />
-    <Reference Include="UnityEngine.ClothModule"     HintPath="$(RefPath)\UnityEngine.ClothModule.dll" Private="False" />
-    <Reference Include="UnityEngine.PhysicsModule"   HintPath="$(RefPath)\UnityEngine.PhysicsModule.dll" Private="False" />
-    <Reference Include="UnityEngine.ParticleSystemModule" HintPath="$(RefPath)\UnityEngine.ParticleSystemModule.dll" Private="False" />
-    <Reference Include="UnityEngine.IMGUIModule"     HintPath="$(RefPath)\UnityEngine.IMGUIModule.dll" Private="False" />
-    <Reference Include="UnityEngine.UIModule"        HintPath="$(RefPath)\UnityEngine.UIModule.dll" Private="False" />
-    <Reference Include="UnityEngine.UI"              HintPath="$(RefPath)\UnityEngine.UI.dll" Private="False" />
-    <Reference Include="Newtonsoft.Json"             HintPath="$(RefPath)\Newtonsoft.Json.dll" Private="False" />
+    <Reference Include="0Harmony"                   HintPath="$(RefPath)/0Harmony.dll" Private="False" />
+    <Reference Include="Assembly-CSharp"             HintPath="$(RefPath)/Assembly-CSharp.dll" Private="False" />
+    <Reference Include="Comfort"                     HintPath="$(RefPath)/Comfort.dll"   Private="False" />
+    <Reference Include="Comfort.Unity"               HintPath="$(RefPath)/Comfort.Unity.dll" Private="False" />
+    <Reference Include="UnityEngine"                 HintPath="$(RefPath)/UnityEngine.dll" Private="False" />
+    <Reference Include="UnityEngine.CoreModule"      HintPath="$(RefPath)/UnityEngine.CoreModule.dll" Private="False" />
+    <Reference Include="UnityEngine.AudioModule"     HintPath="$(RefPath)/UnityEngine.AudioModule.dll" Private="False" />
+    <Reference Include="UnityEngine.AssetBundleModule" HintPath="$(RefPath)/UnityEngine.AssetBundleModule.dll" Private="False" />
+    <Reference Include="UnityEngine.AnimationModule" HintPath="$(RefPath)/UnityEngine.AnimationModule.dll" Private="False" />
+    <Reference Include="UnityEngine.ClothModule"     HintPath="$(RefPath)/UnityEngine.ClothModule.dll" Private="False" />
+    <Reference Include="UnityEngine.PhysicsModule"   HintPath="$(RefPath)/UnityEngine.PhysicsModule.dll" Private="False" />
+    <Reference Include="UnityEngine.ParticleSystemModule" HintPath="$(RefPath)/UnityEngine.ParticleSystemModule.dll" Private="False" />
+    <Reference Include="UnityEngine.IMGUIModule"     HintPath="$(RefPath)/UnityEngine.IMGUIModule.dll" Private="False" />
+    <Reference Include="UnityEngine.UIModule"        HintPath="$(RefPath)/UnityEngine.UIModule.dll" Private="False" />
+    <Reference Include="UnityEngine.UI"              HintPath="$(RefPath)/UnityEngine.UI.dll" Private="False" />
+    <Reference Include="Newtonsoft.Json"             HintPath="$(RefPath)/Newtonsoft.Json.dll" Private="False" />
   </ItemGroup>
 
   <!-- SPT reflection/common DLL -->
   <ItemGroup>
     <Reference Include="spt-reflection"
-      HintPath="$(RefPath)\spt-reflection.dll"
+      HintPath="$(RefPath)/spt-reflection.dll"
       Private="False" />
     <Reference Include="spt-common"
-      HintPath="$(RefPath)\spt-common.dll"
+      HintPath="$(RefPath)/spt-common.dll"
       Private="False" />
   </ItemGroup>
 

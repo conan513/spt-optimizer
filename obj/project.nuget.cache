@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+h3obGG06aI=",
+  "dgSpecHash": "+ru/fw1uDCI=",
   "success": true,
-  "projectFilePath": "/mnt/raid0/Source/Tarkov-Custom-Mods/spt-optimizer/SPTOptimizer.csproj",
+  "projectFilePath": "/mnt/raid0/Source/SPT_mods/spt-optimizer/SPTOptimizer.csproj",
   "expectedPackageFiles": [
     "/home/conan/.nuget/packages/bepinex.analyzers/1.0.8/bepinex.analyzers.1.0.8.nupkg.sha512",
     "/home/conan/.nuget/packages/bepinex.baselib/5.4.20/bepinex.baselib.5.4.20.nupkg.sha512",
