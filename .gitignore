@@ -1,0 +1,23 @@
+## Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+## Packaging and Distributions
+dist/
+*.zip
+
+## Visual Studio / IDEs
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+## Logs and Caches
+*.log
+*.cache
